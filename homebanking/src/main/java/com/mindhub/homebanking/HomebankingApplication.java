@@ -66,7 +66,7 @@ public class HomebankingApplication {
 			loanRepository.save(Loan3);
 
 
-
+///clientmelbaaaa
 
 			ClientLoan ClientLoanMelba1 = new  ClientLoan(400000.00,60,client1,Loan1);
 			clientLoanRepository.save(ClientLoanMelba1);
