@@ -78,7 +78,7 @@ public class HomebankingApplication {
 			clientLoanRepository.save(ClientLoanClient2);
 
 
-
+//tarjetas
             Card newCard = new Card("Melba Morel",CardType.CREDIT, CardColor.GOLD, "5528-8700-3000", 127,LocalDate.now().plusYears(6),LocalDate.now());
             client1.addCard(newCard);
 			cardRepository.save(newCard);
