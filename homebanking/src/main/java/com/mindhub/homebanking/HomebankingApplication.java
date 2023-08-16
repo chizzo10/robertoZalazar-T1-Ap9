@@ -89,7 +89,8 @@ public class HomebankingApplication {
 
 			Card newCard3 = new Card("Melba Morel", CardType.DEBIT, CardColor.TITANIUM, "3080-6774-6932", 780, LocalDate.now().plusYears(5), LocalDate.now());
 			client1.addCard(newCard3);
-			cardRepository.save(newCard3);
+			cardRepository.save(newCard3
+			);
 
 
 
