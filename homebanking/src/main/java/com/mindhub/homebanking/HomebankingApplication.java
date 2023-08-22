@@ -1,12 +1,15 @@
 package com.mindhub.homebanking;
 
 
+import com.mindhub.homebanking.dtos.ClientsDto;
 import com.mindhub.homebanking.models.*;
 import com.mindhub.homebanking.repositories.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,7 +17,8 @@ import java.util.List;
 @SpringBootApplication
 public class HomebankingApplication {
 
-
+	@Autowired
+	private PasswordEncoder passwordEnconder;
 
 	public static void main(String[] args) {
 		SpringApplication.run(HomebankingApplication.class, args);
@@ -22,10 +26,12 @@ public class HomebankingApplication {
 
 
 	@Bean
-	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository  transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository, CardRepository cardRepository){
+	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository, CardRepository cardRepository){
 		return (args) ->{
-			Client client1 = new Client("Melba", "Morel", "melba@minhub.com");
-			Client client2=new Client("Roberto", "Zalazar","servicios773@gmail.com" );
+			Client client1 = new Client("Melba", "Morel", "melba@mindhub.com",passwordEnconder.encode("1234"));
+			Client client2=new Client("Roberto", "Zalazar","servicios773@gmail.com",passwordEnconder.encode("12345"));
+			Client admin= new Client("admin", "admin", "admin@gamail.com", passwordEnconder.encode("0000"));
+			clientRepository.save(admin);
 			clientRepository.save(client1);
 			clientRepository.save(client2);
 
@@ -42,12 +48,12 @@ public class HomebankingApplication {
 			accountRepository.save(account2);
 
 
-			Transaction transaction = new Transaction(TransactionType.DEBIT, -500,  "Farmacia",LocalDate.now());
+			Transaction transaction = new Transaction(TransactionType.DEBIT, -500,  "Farmacia", LocalDate.now());
 			account.addTransaction(transaction);
 			transactionRepository.save(transaction);
 
 
-			Transaction transaction2 = new Transaction(TransactionType.CREDIT, 1000,  "SuperMercado",LocalDate.now());
+			Transaction transaction2 = new Transaction(TransactionType.CREDIT, 1000,  "SuperMercado", LocalDate.now());
 			account2.addTransaction(transaction2);
 			transactionRepository.save(transaction2);
 
@@ -62,7 +68,7 @@ public class HomebankingApplication {
 			Loan Loan2 =new Loan("Automotriz",300000,List.of(6,12,24,36));
 			loanRepository.save(Loan2);
 
-			Loan Loan3 =new Loan("Hipotecario",500000,List.of(12,24,36,48,60));
+			Loan Loan3 =new Loan("Hipotecario",500000, List.of(12,24,36,48,60));
 			loanRepository.save(Loan3);
 
 

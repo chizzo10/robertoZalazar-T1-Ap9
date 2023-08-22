@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class ClientLoanDto {
     private Long id;
-    private Long id_Loan;
+    private Long loanId;
     private String name;
     private Double amount;
 
@@ -15,7 +15,7 @@ public class ClientLoanDto {
     private Set<ClientsDto> clientLoans = new HashSet<>();
     public ClientLoanDto(ClientLoan clientLoan){
         id=clientLoan.getId();
-        id_Loan= clientLoan.getLoan().getId();
+        loanId= clientLoan.getLoan().getId();
         name= clientLoan.getLoan().getName();
         amount= clientLoan.getAmount();
         payments=clientLoan.getPayments();
@@ -24,8 +24,8 @@ public class ClientLoanDto {
         return id;
     }
 
-    public Long getId_Loan() {
-        return id_Loan;
+    public Long getloanId() {
+        return loanId;
     }
 
     public String getName() {
