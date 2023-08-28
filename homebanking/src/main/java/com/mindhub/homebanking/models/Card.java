@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class Card {
@@ -19,8 +20,8 @@ public class Card {
 
     private String number;
     private Integer cvv;
-    private LocalDate thruDate;
-    private LocalDate fromDate;
+    private LocalDateTime fromDate = LocalDateTime.now();
+    private LocalDateTime thruDate = LocalDateTime.now();
 
 @ManyToOne (fetch = FetchType.EAGER)
     @JoinColumn(name="client_id")
@@ -29,14 +30,14 @@ public class Card {
     public Card() {
     }
 
-    public Card(String cardHolder, CardType type, CardColor color, String number, Integer cvv, LocalDate thruDate, LocalDate fromDate) {
+    public Card(String cardHolder, CardType type, CardColor color, String number, Integer cvv, LocalDateTime fromDate, LocalDateTime thruDate) {
         CardHolder = cardHolder;
         this.type = type;
         this.color = color;
         this.number = number;
         this.cvv = cvv;
-        this.thruDate = thruDate;
         this.fromDate = fromDate;
+        this.thruDate = thruDate;
     }
 
     public Long getId() {
@@ -63,18 +64,17 @@ public class Card {
         return cvv;
     }
 
-    public LocalDate getThruDate() {
-        return thruDate;
+    public LocalDateTime getFromDate() {
+        return fromDate;
     }
 
-    public LocalDate getFromDate() {
-        return fromDate;
+    public LocalDateTime getThruDate() {
+        return thruDate;
     }
 
     public Client getClient() {
         return client;
     }
-
     public void setClient(Client client) {
         this.client = client;
     }
