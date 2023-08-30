@@ -39,11 +39,12 @@ public class AccountController {
 
 
 
-   /* @GetMapping("/accounts/{id}")
-    public AccountDto getAccountById(@PathVariable Long id, Authentication authentication){
-       Optional<Account> accountOptional = accountRepository.findById(id);
-        return new AccountDto(accountOptional.get());
-    }*/
+    @RequestMapping("/clients/current/accounts")
+    public List<AccountDto> getAccount( Authentication authentication) {
+        Client client= clientRepository.findByEmail(authentication.getName()) ;
+        return client.getAccounts().stream().map(account -> new AccountDto(account)).collect(Collectors.toList());
+
+    }
 
     @GetMapping("/accounts/{id}")
     public ResponseEntity<Object> getAccountById(@PathVariable Long id, Authentication authentication) {
