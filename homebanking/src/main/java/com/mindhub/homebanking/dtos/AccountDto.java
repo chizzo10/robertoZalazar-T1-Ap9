@@ -42,7 +42,7 @@ public class AccountDto {
         return number;
     }
 
-    public LocalDate getDate() {
+    public LocalDate getCreationDate() {
         return creationDate;
     }
 
