@@ -1,10 +1,12 @@
 package com.mindhub.homebanking.controllers;
 
+
 import com.mindhub.homebanking.dtos.AccountDto;
+import com.mindhub.homebanking.dtos.ClientsDto;
 import com.mindhub.homebanking.models.Account;
 import com.mindhub.homebanking.models.Client;
-import com.mindhub.homebanking.repositories.AccountRepository;
-import com.mindhub.homebanking.repositories.ClientRepository;
+import com.mindhub.homebanking.services.AccountService;
+import com.mindhub.homebanking.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,98 +15,69 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
 public class AccountController {
     @Autowired
-    private AccountRepository accountRepository;
-
+    private AccountService accountService;
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
     @GetMapping("/accounts")
-    public List<AccountDto> getAccount(){
-        List<Account>allAccount = accountRepository.findAll();
-
-        List<AccountDto> acccountDtoCovertList = allAccount
-                .stream()
-                .map(Account -> new AccountDto(Account))
-                .collect(Collectors.toList());
-        return acccountDtoCovertList;
+    public ResponseEntity<Object> getAccounts() {
+        List<Account> accounts = accountService.findAll();
+        List<AccountDto> accountsDTO = accountService.map(accounts);
+        return new ResponseEntity<>(accountsDTO, HttpStatus.ACCEPTED);
     }
 
-
-
-    @RequestMapping("/clients/current/accounts")
-    public List<AccountDto> getAccount( Authentication authentication) {
-        Client client= clientRepository.findByEmail(authentication.getName()) ;
-        return client.getAccounts().stream().map(account -> new AccountDto(account)).collect(Collectors.toList());
-
-    }
 
     @GetMapping("/accounts/{id}")
-    public ResponseEntity<Object> getAccountById(@PathVariable Long id, Authentication authentication) {
-        Optional<Account> accountOptional = accountRepository.findById(id);
+    public ResponseEntity<Object> getAccountsById(@PathVariable Long id, Authentication authentication) {
 
-        if (accountOptional.isPresent()) {
-            Account account = accountOptional.get();
-            Client client = clientRepository.findByEmail(authentication.getName());
-
-            if (account.getUser().equals(client)) {
-                AccountDto accountDto = new AccountDto(account);
-                return new ResponseEntity<>(accountDto, HttpStatus.ACCEPTED);
-            } else {
-                return new ResponseEntity<>("Esta cuenta no es tuya", HttpStatus.I_AM_A_TEAPOT);
-            }
+        Client client = clientService.findByEmail(authentication.getName());
+        Account account = accountService.findById(id);
+        if (account == null) {
+            return new ResponseEntity<>("account not found", HttpStatus.BAD_GATEWAY);
+        }
+        if (account.getUser().equals(client)) {
+            AccountDto accountDTO = new AccountDto(account);
+            return new ResponseEntity<>(accountDTO, HttpStatus.ACCEPTED);
         } else {
-            return new ResponseEntity<>("Cuenta no encontrada", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("This account it's not your", HttpStatus.BAD_REQUEST);
         }
     }
 
+    @RequestMapping(path = "/clients/current/accounts", method = RequestMethod.POST)
+    public ResponseEntity<Object> createAccount(Authentication authentication) {
 
-
-    @PostMapping("/clients/current/accounts")
-    public ResponseEntity<String> createAccount(Authentication authentication) {
-
-        String username = authentication.getName();
-
-
-        Client client = clientRepository.findByEmail(username);
-
-        if (client == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found.");
+        Client client = clientService.findByEmail(authentication.getName());
+        if (client.getAccounts().size() == 3) {
+            return new ResponseEntity<>("Max amount of accounts reached", HttpStatus.FORBIDDEN);
         }
+        String randomNum;
+        do {
+            Random random = new Random();
+            randomNum = "VIN-" + random.nextInt(90000000);
+        } while (accountService.findByNumber(randomNum) != null);
 
-
-        if (client.getAccounts().size() >= 3) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Client already has 3 accounts.");
-        }
-
-
-        String accountNumber = generateAccountNumber();
-
-
-        Account account = new Account(accountNumber, LocalDate.now(), 0);
-        account.setUser(client);
-        accountRepository.save(account);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("New account created for client: " + client.getEmail());
+        Account account = new Account(randomNum, LocalDate.now(), 0.0);
+        client.addAccount(account);
+        accountService.save(account);
+        return new ResponseEntity<>("Account created succesfully", HttpStatus.CREATED);
     }
 
-
-    private String generateAccountNumber() {
-        String prefix = "VIN-";
-        Random random = new Random();
-        int accountNumber = random.nextInt(900000) + 100000;
-        return prefix + accountNumber;
+    @GetMapping("/clients/current/accounts")
+    public ResponseEntity<Object> getAccount(Authentication authentication) {
+        Client client = clientService.findByEmail(authentication.getName());
+        if (client != null) {
+            return new ResponseEntity<>(new ClientsDto(client).getAccounts(), HttpStatus.ACCEPTED);
+        } else {
+            return new ResponseEntity<>("Resource bot found", HttpStatus.NOT_FOUND);
+        }
     }
-
-
-
-
-
 }
+
+
+

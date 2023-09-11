@@ -7,6 +7,9 @@ import com.mindhub.homebanking.models.TransactionType;
 import com.mindhub.homebanking.repositories.AccountRepository;
 import com.mindhub.homebanking.repositories.ClientRepository;
 import com.mindhub.homebanking.repositories.TransactionRepository;
+import com.mindhub.homebanking.services.AccountService;
+import com.mindhub.homebanking.services.ClientService;
+import com.mindhub.homebanking.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +29,11 @@ import java.util.Set;
 public class TransactionController {
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
     @Autowired
-    private TransactionRepository transactionRepository;
+    private TransactionService transactionService;
 
     @Transactional
     @PostMapping("/transactions")
@@ -40,10 +43,10 @@ public class TransactionController {
                                                   @RequestParam double amount,
                                                   @RequestParam String description) {
 
-        Client client = clientRepository.findByEmail(authentication.getName());
+        Client client = clientService.findByEmail(authentication.getName());
         Set<Account> clientAccounts = client.getAccounts();
-        Account fromAccount = accountRepository.findByNumber(fromAccountNumber);
-        Account toAccount = accountRepository.findByNumber(toAccountNumber);
+        Account fromAccount = accountService.findByNumber(fromAccountNumber);
+        Account toAccount = accountService.findByNumber(toAccountNumber);
 
         // Validaciones
         if (description.isBlank() || fromAccountNumber.isBlank() || toAccountNumber.isBlank()) {
@@ -78,8 +81,14 @@ public class TransactionController {
         toAccount.setBalance(toAccount.getBalance() + amount);
 
         // Guardar cambios
-        transactionRepository.saveAll(Arrays.asList(debitTransaction, creditTransaction));
-        accountRepository.saveAll(Arrays.asList(fromAccount, toAccount));
+
+        transactionService.save(debitTransaction);
+        transactionService.save(creditTransaction);
+
+
+        accountService.save(fromAccount);
+        accountService.save(toAccount);
+
 
         return new ResponseEntity<>("Transaction successful", HttpStatus.CREATED);
     }
