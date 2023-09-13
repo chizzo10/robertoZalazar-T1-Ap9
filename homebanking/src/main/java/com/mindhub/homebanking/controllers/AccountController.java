@@ -7,6 +7,7 @@ import com.mindhub.homebanking.models.Account;
 import com.mindhub.homebanking.models.Client;
 import com.mindhub.homebanking.services.AccountService;
 import com.mindhub.homebanking.services.ClientService;
+import com.mindhub.homebanking.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,18 +57,18 @@ public class AccountController {
         if (client.getAccounts().size() == 3) {
             return new ResponseEntity<>("Max amount of accounts reached", HttpStatus.FORBIDDEN);
         }
-        String randomNum;
-        do {
-            Random random = new Random();
-            randomNum = "VIN-" + random.nextInt(90000000);
-        } while (accountService.findByNumber(randomNum) != null);
+
+        String randomNum = AccountUtils.generateRandomAccountNumber();
+
+        if (accountService.findByNumber(randomNum) != null) {
+
+        }
 
         Account account = new Account(randomNum, LocalDate.now(), 0.0);
         client.addAccount(account);
         accountService.save(account);
-        return new ResponseEntity<>("Account created succesfully", HttpStatus.CREATED);
+        return new ResponseEntity<>("Account created successfully", HttpStatus.CREATED);
     }
-
     @GetMapping("/clients/current/accounts")
     public ResponseEntity<Object> getAccount(Authentication authentication) {
         Client client = clientService.findByEmail(authentication.getName());

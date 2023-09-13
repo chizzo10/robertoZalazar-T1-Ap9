@@ -1,6 +1,5 @@
 package com.mindhub.homebanking.controllers;
 
-
 import com.mindhub.homebanking.dtos.ClientsDto;
 import com.mindhub.homebanking.models.Client;
 import com.mindhub.homebanking.repositories.ClientRepository;
@@ -14,11 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api")
 public class ClientController {
-
 
     @Autowired
     private ClientService clientService;
@@ -39,7 +36,7 @@ public class ClientController {
         return clientService.getClientsDto(id);
     }
 
-    @RequestMapping(path = "/clients", method = RequestMethod.POST)
+    @PostMapping("/clients")
     public ResponseEntity<Object> register(
             @RequestParam String firstName, @RequestParam String lastName,
             @RequestParam String email, @RequestParam String password) {
@@ -54,9 +51,9 @@ public class ClientController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @RequestMapping("/clients/current")
+    @GetMapping("/clients/current")
     public ClientsDto getAll(Authentication authentication) {
         return clientService.getAll(authentication.getName());
     }
-
 }
+
